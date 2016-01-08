@@ -1,0 +1,5 @@
+flask
+flask_admin
+flask_script
+flask_sqlalchemy
+haxor
