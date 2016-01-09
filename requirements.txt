@@ -1,5 +1,6 @@
 flask
 flask_admin
 flask_script
+flask_security
 flask_sqlalchemy
 haxor
