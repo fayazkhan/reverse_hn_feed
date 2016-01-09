@@ -5,6 +5,7 @@ from flask_security import (
     current_user, RoleMixin, Security, SQLAlchemyUserDatastore, UserMixin)
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+from sqlalchemy.ext.associationproxy import association_proxy
 
 
 app = Flask(__name__)
@@ -79,6 +80,14 @@ def index():
 
 
 class UserNewsItemModelView(ModelView):
+
+    can_create = False
+    can_edit = False
+    column_list = ('news_item.url', 'news_item.hn_url', 'news_item.posted_on',
+                   'news_item.upvotes', 'unread')
+    column_editable_list = ('unread',)
+    column_sortable_list = ('news_item.posted_on',)
+    column_default_sort = ('news_item.posted_on', True)
 
     def is_accessible(self):
         return current_user.is_active and current_user.is_authenticated
