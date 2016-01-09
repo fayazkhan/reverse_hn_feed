@@ -17,9 +17,9 @@ app.config['SECURITY_URL_PREFIX'] = "/admin"
 app.config['SECURITY_LOGIN_URL'] = "/login/"
 app.config['SECURITY_LOGOUT_URL'] = "/logout/"
 app.config['SECURITY_REGISTER_URL'] = "/register/"
-app.config['SECURITY_POST_LOGIN_VIEW'] = "/admin/"
+app.config['SECURITY_POST_LOGIN_VIEW'] = "/admin/usernewsitem/"
 app.config['SECURITY_POST_LOGOUT_VIEW'] = "/admin/"
-app.config['SECURITY_POST_REGISTER_VIEW'] = "/admin/"
+app.config['SECURITY_POST_REGISTER_VIEW'] = "/admin/usernewsitem/"
 db = SQLAlchemy(app)
 admin = Admin(app, base_template='my_master.html', name='reverse_hn_feed')
 
