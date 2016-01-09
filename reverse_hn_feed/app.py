@@ -5,7 +5,6 @@ from flask_security import (
     current_user, RoleMixin, Security, SQLAlchemyUserDatastore, UserMixin)
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
-from sqlalchemy.ext.associationproxy import association_proxy
 
 
 app = Flask(__name__)
