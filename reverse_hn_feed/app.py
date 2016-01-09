@@ -58,7 +58,9 @@ class UserNewsItem(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    user = db.relationship(User)
     news_id = db.Column(db.Integer, db.ForeignKey(NewsItem.id))
+    news_item = db.relationship(NewsItem)
     unread = db.Column(db.Boolean, default=False)
 
 
