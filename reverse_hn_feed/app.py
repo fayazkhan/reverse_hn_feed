@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, request, url_for
 from flask_admin import Admin, helpers as admin_helpers
 from flask_admin.contrib.sqla import ModelView
 from flask_security import (
@@ -75,7 +75,7 @@ security = Security(app, user_datastore)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('admin.index'))
 
 
 class UserNewsItemModelView(ModelView):
