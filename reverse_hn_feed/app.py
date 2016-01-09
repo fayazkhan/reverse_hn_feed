@@ -4,6 +4,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_security import (
     current_user, RoleMixin, Security, SQLAlchemyUserDatastore, UserMixin)
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 
 
 app = Flask(__name__)
@@ -42,7 +43,6 @@ class Role(db.Model, RoleMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
-    description = db.Column(db.String(255))
 
 
 class User(db.Model, UserMixin):
@@ -52,6 +52,11 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String)
     active = db.Column(db.Boolean)
     roles = db.relationship(Role, secondary=roles_users)
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        for news_item in NewsItem.query.all():
+            db.session.add(UserNewsItem(user=self, news_item=news_item))
 
 
 class UserNewsItem(db.Model):
@@ -73,7 +78,7 @@ def index():
     return render_template('index.html')
 
 
-class MyModelView(ModelView):
+class UserNewsItemModelView(ModelView):
 
     def is_accessible(self):
         return current_user.is_active and current_user.is_authenticated
@@ -81,6 +86,14 @@ class MyModelView(ModelView):
     def _handle_view(self, name, **kwargs):
         if not self.is_accessible() and not current_user.is_authenticated:
             return redirect(url_for('security.login', next=request.url))
+
+    def get_query(self):
+        return self.session.query(UserNewsItem).filter(
+            UserNewsItem.user_id == current_user.id)
+
+    def get_count_query(self):
+        return self.session.query(func.count('*')).filter(
+            UserNewsItem.user_id == current_user.id)
 
 
 @security.context_processor
@@ -92,4 +105,4 @@ def security_context_processor():
     )
 
 
-admin.add_view(MyModelView(UserNewsItem, db.session))
+admin.add_view(UserNewsItemModelView(UserNewsItem, db.session))
