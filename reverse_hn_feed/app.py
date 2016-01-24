@@ -1,9 +1,12 @@
+import json
+
 from flask import Flask, redirect, request, url_for
 from flask_admin import Admin, helpers as admin_helpers
 from flask_admin.contrib.sqla import ModelView
 from flask_security import (
     current_user, RoleMixin, Security, SQLAlchemyUserDatastore, UserMixin)
 from flask_sqlalchemy import SQLAlchemy
+from hackernews import HackerNews
 from sqlalchemy import func
 
 
@@ -31,6 +34,7 @@ class NewsItem(db.Model):
     hn_url = db.Column(db.String)
     posted_on = db.Column(db.DateTime)
     upvotes = db.Column(db.Integer)
+    comments = db.Column(db.Integer)
 
 
 roles_users = db.Table(
@@ -83,7 +87,7 @@ class UserNewsItemModelView(ModelView):
     can_create = False
     can_edit = False
     column_list = ('news_item.url', 'news_item.hn_url', 'news_item.posted_on',
-                   'news_item.upvotes', 'unread')
+                   'news_item.upvotes', 'news_item.comments', 'unread')
     column_editable_list = ('unread',)
     column_sortable_list = ('news_item.posted_on',)
     column_default_sort = ('news_item.posted_on', True)
@@ -114,3 +118,28 @@ def security_context_processor():
 
 
 admin.add_view(UserNewsItemModelView(UserNewsItem, db.session))
+
+
+def sync_with_hacker_news():
+    hn = HackerNews()
+    for story_id in hn.top_stories(limit=90):
+        story = hn.get_item(story_id)
+        persisted_news_item = NewsItem.query.get(story_id)
+        if persisted_news_item:
+            print "Updating story:", story_id
+            persisted_news_item.upvotes = story.score
+            persisted_news_item.comments = comment_count(story)
+        else:
+            print "Adding story:", story_id
+            news_item = NewsItem(
+                id=story_id, url=story.url, posted_on=story.submission_time,
+                upvotes=story.score,
+                comments=comment_count(story))
+            db.session.add(news_item)
+            for user in User.query.all():
+                db.session.add(UserNewsItem(user=user, news_item=news_item))
+    db.session.commit()
+
+
+def comment_count(story):
+    return json.loads(story.raw).get('descendants', 0)
