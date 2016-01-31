@@ -1,6 +1,6 @@
 from flask.ext.script import Manager
 
-from reverse_hn_feed.app import app, db, sync_with_hacker_news
+from reverse_hn_feed import app, db, sync_with_hacker_news
 
 
 manager = Manager(app)
